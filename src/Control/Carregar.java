@@ -1,4 +1,3 @@
-
 package Control;
 
 import Model.Estabelecimento;
@@ -11,10 +10,21 @@ import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import org.apache.commons.logging.LogFactory;
 
 public class Carregar {
+
+    private final ArrayList<Estabelecimento> estab = new ArrayList<Estabelecimento>();
+
+    public void addEstab(Estabelecimento ct) {
+        estab.add(ct);
+    }
+
+    public ArrayList<Estabelecimento> getEstab() {
+        return (estab);
+    }
 
     public void tratarErros(WebClient client) {
         LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
@@ -30,8 +40,8 @@ public class Carregar {
         client.getOptions().setThrowExceptionOnFailingStatusCode(false);
         client.getOptions().setThrowExceptionOnScriptError(false);
     }
-    
-    public void setarEstMun(HtmlPage page,String estado,String municipio) throws InterruptedException{
+
+    public void setarEstMun(HtmlPage page, String estado, String municipio) throws InterruptedException {
         //setar estado
         HtmlSelect estados = page.getFirstByXPath("/html/body//form//select[@ng-change='carregarMunicipios()' and @ng-model='Estado']");
         estados.getOptionByValue(estado).setSelected(true);
@@ -41,9 +51,8 @@ public class Carregar {
         //setar municipio
         HtmlSelect municipios = page.getFirstByXPath("/html/body//form//select[@ng-model='Municipio']");
         municipios.getOptionByValue(municipio).setSelected(true);
-        
+
     }
-    
 
     public void addInf(HtmlPage pagina) throws IOException {
         HtmlInput nome = pagina.getFirstByXPath("//input[@id='nome']");
@@ -58,7 +67,8 @@ public class Carregar {
         HtmlInput uf = pagina.getFirstByXPath("//input[@ng-value='estabelecimento.uf']");
         HtmlInput cep = pagina.getFirstByXPath("//input[@ui-mask='99999-999']");
         HtmlInput tel = pagina.getFirstByXPath("//input[@id='tel']");
-        Principal.addEstab(new Estabelecimento(nome.asText(), nomeemp.asText(), cnes.asText(), cnpj.asText(), logra.asText(), nume.asText(), comple.asText(), bairro.asText(), muni.asText(), uf.asText(), cep.asText(), tel.asText()) {
+        //Guardando Dados
+        addEstab(new Estabelecimento(nome.asText(), nomeemp.asText(), cnes.asText(), cnpj.asText(), logra.asText(), nume.asText(), comple.asText(), bairro.asText(), muni.asText(), uf.asText(), cep.asText(), tel.asText()) {
         });
         HtmlButton btnFechar = pagina.getFirstByXPath("//button[@class='close']");
         btnFechar.click();
@@ -67,32 +77,8 @@ public class Carregar {
     public void criarCSV() throws IOException {
         FileWriter pw = new FileWriter(new File("Dados.csv"));
         StringBuilder sb = new StringBuilder();
-        sb.append("Nome");
-        sb.append(';');
-        sb.append("Nome Empresarial");
-        sb.append(';');
-        sb.append("Cnes");
-        sb.append(';');
-        sb.append("CNPJ");
-        sb.append(';');
-        sb.append("Logradouro");
-        sb.append(';');
-        sb.append("Numero");
-        sb.append(';');
-        sb.append("Complemento");
-        sb.append(';');
-        sb.append("Bairro");
-        sb.append(';');
-        sb.append("Municipio");
-        sb.append(';');
-        sb.append("UF");
-        sb.append(';');
-        sb.append("CEP");
-        sb.append(';');
-        sb.append("Telefone");
-        sb.append('\n');
-
-        for (Estabelecimento o : Principal.getEstab()) {
+        sb.append("Nome;Nome Empresarial;Cnes;CNPJ;Logradouro;Numero;Complemento;Bairro;Municipio;UF;CEP;Telefone\n");
+        for (Estabelecimento o : getEstab()) {
             sb.append(o.getNome());
             sb.append(';');
             sb.append(o.getNomeEmp());
@@ -118,7 +104,6 @@ public class Carregar {
             sb.append(o.getTel());
             sb.append('\n');
         }
-
         pw.write(sb.toString());
         pw.close();
         System.out.println("Tarefa finalizada com sucesso.");

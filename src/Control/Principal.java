@@ -1,32 +1,19 @@
 package Control;
 
-import Model.Estabelecimento;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlButton;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import java.io.IOException;
-import java.util.ArrayList;
 import javax.swing.JOptionPane;
 
 public class Principal {
-
-    private static ArrayList<Estabelecimento> estab = new ArrayList<Estabelecimento>();
-
-    public static void addEstab(Estabelecimento ct) {
-        estab.add(ct);
-    }
-
-    public static ArrayList<Estabelecimento> getEstab() {
-        return (estab);
-    }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         WebClient client = new WebClient(BrowserVersion.CHROME);
         Carregar carreg = new Carregar();
         JOptionPane.showMessageDialog(null, "O processo levara tempo, aguarde.");
-        
 
         //Tratar mensagens de erro
         carreg.tratarErros(client);
@@ -36,19 +23,20 @@ public class Principal {
 
         //Configurando a pagina
         HtmlPage pagina = client.getPage(connection_url);
-
+       
         //setando botao pesquisar
-        final HtmlButton btnPesquisa = pagina.getFirstByXPath("/html/body//form//button[@class='btn btn-primary' and @ng-click='pesquisaEstabelecimentos()']");
+        final HtmlButton btnPesquisa = pagina.getFirstByXPath("//button[@ng-click='pesquisaEstabelecimentos()']");
 
         Thread.sleep(3_000);
-        
+
         //Setar Estado e Municipio
         String estado = "26";
-        String municipio="260960";
+        String municipio = "260960";
         carreg.setarEstMun(pagina, estado, municipio);
         
-        pagina = btnPesquisa.click();
-        Thread.sleep(3_000);
+        //Pesquisando
+        btnPesquisa.click();
+        Thread.sleep(2_000);
 
         //Abrir Fichas
         HtmlElement btnProxFich;
@@ -62,6 +50,7 @@ public class Principal {
                 }
                 btnFicha.click();
                 Thread.sleep(2_000);
+                //Coletando Informações
                 carreg.addInf(pagina);
                 cont += 1;
             }
@@ -73,8 +62,8 @@ public class Principal {
             i++;
         } while (true);
         System.out.println("\nTotal de dados: " + cont);
-        JOptionPane.showMessageDialog(null, "Processo Completo");
         carreg.criarCSV();
+        JOptionPane.showMessageDialog(null, "Processo Completo");
         client.close();
     }
 
